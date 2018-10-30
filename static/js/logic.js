@@ -1,49 +1,51 @@
 // Creating map object
+
 var myMap = L.map("map", {
-  center: [56,220],
-  zoom: 3.5 
+  center: [-60,10],
+  zoom: 1.5
 });
 
-// Adding tile layer to the map
+
+
 L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
   maxZoom: 18,
-  id: "mapbox.streets",
+  id: "mapbox.light",
   accessToken: API_KEY
 }).addTo(myMap);
 
 // Store API query variables
-var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson";
-// var date = "$where=created_date between'2016-01-10T12:00:00' and '2017-01-01T14:00:00'";
-// var complaint = "&complaint_type=Rodent";
-// var limit = "&$limit=10000";
+var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-// // Assemble API query URL
-// var url = baseURL + date + complaint + limit;
+
 
 // Grab the data with d3
 d3.json(url, function(response) {
-
-  // Create a new marker cluster group
   var markers = L.markerClusterGroup();
+  // Loop through the features array
+  for (var i = 0; i < response.features.length; i++) {
 
-  // Loop through data
-  for (var i = 0; i < response.length; i++) {
+    var location=response.features[i].geometry.coordinates;
+    
+      // Check for location property
+      if (location) {
 
-    // Set the data location property to a variable
-    var location = response[i].coordinates;
-
-    // Check for location property
-    if (location) {
-
-      // Add a new marker to the cluster group and bind a pop-up
-      markers.addLayer(L.marker([location.coordinates[1], location.coordinates[0]])
-        .bindPopup(response[i].mmi));
+        // Add a new marker to the cluster group and bind a pop-up
+        markers.addLayer(L.marker([location[1], location[0]])
+          .bindPopup(response.features[i].properties.mag));
+      }
     }
 
-  }
-
-  // Add our marker cluster layer to the map
-  myMap.addLayer(markers);
-
+    // Add our marker cluster layer to the map
+    myMap.addLayer(markers);
+ 
 });
+
+
+
+
+
+
+
+
+
